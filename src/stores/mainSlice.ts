@@ -2,15 +2,14 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { UserPayloadObject } from '../interfaces'
 
 interface MainState {
-  userName: string
-  userEmail: null | string
+  
   isFieldFocusRegistered: boolean
+  token:string
 }
 
 const initialState: MainState = {
   /* User */
-  userName: 'John Doe',
-  userEmail: 'doe.doe.doe@example.com',
+ token:"",
 
   /* Field focus with ctrl+k (to register only once) */
   isFieldFocusRegistered: false,
@@ -21,13 +20,16 @@ export const mainSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<UserPayloadObject>) => {
-      state.userName = action.payload.name
-      state.userEmail = action.payload.email
+      // state.userName = action.payload.name
+      // state.userEmail = action.payload.email
     },
-  },
+    setToken: (state, action: PayloadAction<any>) => {
+      state.token = action.payload
+    },
+  }
 })
 
 // Action creators are generated for each case reducer function
-export const { setUser } = mainSlice.actions
+export const { setUser,setToken } = mainSlice.actions
 
 export default mainSlice.reducer

@@ -1,6 +1,6 @@
 import { mdiGithub, mdiMonitorCellphone, mdiTableBorder, mdiTableOff } from '@mdi/js'
 import Head from 'next/head'
-import React, { ReactElement } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 import Button from '../components/Button'
 import CardBox from '../components/CardBox'
 import CardBoxComponentEmpty from '../components/CardBox/Component/Empty'
@@ -10,42 +10,39 @@ import SectionMain from '../components/Section/Main'
 import SectionTitleLineWithButton from '../components/Section/TitleLineWithButton'
 import TableSampleClients from '../components/Table/SampleClients'
 import { getPageTitle } from '../config'
+import useAxios from '../hooks/useAxios'
+import Input from '../components/Input/Input'
 
 const TablesPage = () => {
+
+
+  const { data, error, loading, sendRequest } = useAxios()
+
+  const [isuserUpdate, setIsuserUpdate] = useState(false)
+  useEffect(() => {
+    sendRequest('user/all')
+  }, [isuserUpdate])
+
+  console.log('isuserUpdate', isuserUpdate)
+
+  useEffect(() => {
+    setIsuserUpdate(false)
+  }, [data])
+
   return (
     <>
-      <Head>
+      {/* <Head>
         <title>{getPageTitle('Tables')}</title>
-      </Head>
+      </Head> */}
       <SectionMain>
-        <SectionTitleLineWithButton icon={mdiTableBorder} title="Tables" main>
-          <Button
-            href="https://github.com/justboil/admin-one-react-tailwind"
-            target="_blank"
-            icon={mdiGithub}
-            label="Star on GitHub"
-            color="contrast"
-            roundedFull
-            small
-          />
-        </SectionTitleLineWithButton>
+        {/* <SectionTitleLineWithButton icon={mdiTableBorder} title="Tables" main>
+       
+        </SectionTitleLineWithButton> */}
 
-        <NotificationBar color="info" icon={mdiMonitorCellphone}>
-          <b>Responsive table.</b> Collapses on mobile
-        </NotificationBar>
+        <h1 className="mb-3 text-3xl font-bold">USERS</h1>
 
         <CardBox className="mb-6" hasTable>
-          <TableSampleClients />
-        </CardBox>
-
-        <SectionTitleLineWithButton icon={mdiTableOff} title="Empty variation" />
-
-        <NotificationBar color="danger" icon={mdiTableOff}>
-          <b>Empty card.</b> When there&apos;s nothing to show
-        </NotificationBar>
-
-        <CardBox>
-          <CardBoxComponentEmpty />
+          <TableSampleClients data={data?.result} setIsuserUpdate={setIsuserUpdate} />
         </CardBox>
       </SectionMain>
     </>

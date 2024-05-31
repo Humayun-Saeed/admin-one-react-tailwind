@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 import Head from 'next/head'
 import Button from '../components/Button'
@@ -12,25 +12,35 @@ import Divider from '../components/Divider'
 import Buttons from '../components/Buttons'
 import { useRouter } from 'next/router'
 import { getPageTitle } from '../config'
+import useAxios from '../hooks/useAxios'
+import { setToken } from '../stores/mainSlice'
 
 type LoginForm = {
   login: string
   password: string
-  remember: boolean
 }
 
 const LoginPage = () => {
   const router = useRouter()
 
-  const handleSubmit = (formValues: LoginForm) => {
-    router.push('/dashboard')
-    console.log('Form values', formValues)
+  const { data, error, sendRequest } = useAxios()
+
+  const handleSubmit = async (formValues: LoginForm) => {
+    if (formValues.login === 'admin@gmail.com' && formValues.password === 'password') {
+      await sendRequest(`user/id?id=${'admin'}`)
+    }
   }
 
+  useEffect(() => {
+    if (data?.token) {
+      setToken(data?.token)
+      router.push('/dashboard')
+    }
+  }, [data])
+
   const initialValues: LoginForm = {
-    login: 'john.doe',
-    password: 'bG1sL9eQ1uD2sK3b',
-    remember: true,
+    login: '',
+    password: '',
   }
 
   return (
@@ -40,7 +50,7 @@ const LoginPage = () => {
       </Head>
 
       <SectionFullScreen bg="purplePink">
-        <CardBox className="w-11/12 md:w-7/12 lg:w-6/12 xl:w-4/12 shadow-2xl">
+        <CardBox className="w-11/12 shadow-2xl md:w-7/12 lg:w-6/12 xl:w-4/12">
           <Formik initialValues={initialValues} onSubmit={handleSubmit}>
             <Form>
               <FormField label="Login" help="Please enter your login">
@@ -51,9 +61,9 @@ const LoginPage = () => {
                 <Field name="password" type="password" />
               </FormField>
 
-              <FormCheckRadio type="checkbox" label="Remember">
+              {/* <FormCheckRadio type="checkbox" label="Remember">
                 <Field type="checkbox" name="remember" />
-              </FormCheckRadio>
+              </FormCheckRadio> */}
 
               <Divider />
 

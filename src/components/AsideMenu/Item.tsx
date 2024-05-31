@@ -12,7 +12,7 @@ type Props = {
   isDropdownList?: boolean
 }
 
-const AsideMenuItem = ({ item, isDropdownList = false }: Props) => {
+const dementAsideMenuItem = ({ item, isDropdownList = false }: Props) => {
   const [isLinkActive, setIsLinkActive] = useState(false)
   const [isDropdownActive, setIsDropdownActive] = useState(false)
 

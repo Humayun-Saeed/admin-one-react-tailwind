@@ -6,9 +6,10 @@ import {
   mdiGithub,
   mdiMonitorCellphone,
   mdiReload,
+  mdiFood,
 } from '@mdi/js'
 import Head from 'next/head'
-import React, { useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 import Button from '../components/Button'
 import LayoutAuthenticated from '../layouts/Authenticated'
@@ -26,6 +27,9 @@ import ChartLineSample from '../components/ChartLineSample'
 import NotificationBar from '../components/NotificationBar'
 import TableSampleClients from '../components/Table/SampleClients'
 import { getPageTitle } from '../config'
+import { BiDish } from 'react-icons/bi'
+import UserJoinChart from '../components/UserJoinChart/UserJoinChart'
+import useAxios from '../hooks/useAxios'
 
 const DashboardPage = () => {
   const { clients } = useSampleClients()
@@ -41,25 +45,48 @@ const DashboardPage = () => {
     setChartData(sampleChartData())
   }
 
+  console.log('Chart ', chartData)
+  const userData = [
+    { date: '2023-05-01', count: 5 },
+    { date: '2023-05-02', count: 8 },
+    { date: '2023-05-03', count: 3 },
+    { date: '2023-05-04', count: 12 },
+    { date: '2023-05-05', count: 7 },
+    { date: '2023-05-06', count: 15 },
+  ]
+
+  const { data, error, loading, sendRequest } = useAxios()
+  const { data:DishData,  sendRequest:SendDishRequest } = useAxios()
+
+  useLayoutEffect(() => {
+    SendDishRequest('Dish/all')
+  }, [])
+
+  useEffect(() => {
+    let method
+    sendRequest('user/joinDates')
+  }, [])
+
+  useEffect(() => {
+    if (data) {
+      console.log('DATAaa', data)
+    }
+  }, [data])
+
+  useEffect(() => {
+    console.log('Error', error)
+  }, [error])
+
+  console.log("Dishaaaa",DishData?.result?.length);
+  
+
   return (
     <>
       <Head>
         <title>{getPageTitle('Dashboard')}</title>
       </Head>
       <SectionMain>
-        <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Overview" main>
-          <Button
-            href="https://github.com/justboil/admin-one-react-tailwind"
-            target="_blank"
-            icon={mdiGithub}
-            label="Star on GitHub"
-            color="contrast"
-            roundedFull
-            small
-          />
-        </SectionTitleLineWithButton>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-6">
+        <div className="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-3">
           <CardBoxWidget
             trendLabel="12%"
             trendType="up"
@@ -71,13 +98,12 @@ const DashboardPage = () => {
           />
           <CardBoxWidget
             trendLabel="16%"
-            trendType="down"
+            trendType="up"
             trendColor="danger"
-            icon={mdiCartOutline}
+            icon={mdiFood}
             iconColor="info"
-            number={7770}
-            numberPrefix="$"
-            label="Sales"
+            number={DishData?.result?.length}
+            label="Dishes"
           />
           <CardBoxWidget
             trendLabel="Overflow"
@@ -91,38 +117,7 @@ const DashboardPage = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="flex flex-col justify-between">
-            {transactions.map((transaction: Transaction) => (
-              <CardBoxTransaction key={transaction.id} transaction={transaction} />
-            ))}
-          </div>
-          <div className="flex flex-col justify-between">
-            {clientsListed.map((client: Client) => (
-              <CardBoxClient key={client.id} client={client} />
-            ))}
-          </div>
-        </div>
-
-        <div className="my-6">
-          <SectionBannerStarOnGitHub />
-        </div>
-
-        <SectionTitleLineWithButton icon={mdiChartPie} title="Trends overview">
-          <Button icon={mdiReload} color="whiteDark" onClick={fillChartData} />
-        </SectionTitleLineWithButton>
-
-        <CardBox className="mb-6">{chartData && <ChartLineSample data={chartData} />}</CardBox>
-
-        <SectionTitleLineWithButton icon={mdiAccountMultiple} title="Clients" />
-
-        <NotificationBar color="info" icon={mdiMonitorCellphone}>
-          <b>Responsive table.</b> Collapses on mobile
-        </NotificationBar>
-
-        <CardBox hasTable>
-          <TableSampleClients />
-        </CardBox>
+        <UserJoinChart data={data?.result} />
       </SectionMain>
     </>
   )

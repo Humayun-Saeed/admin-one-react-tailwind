@@ -5,6 +5,8 @@ import AsideMenuItem from './Item'
 import AsideMenuList from './List'
 import { MenuAsideItem } from '../../interfaces'
 import { useAppSelector } from '../../stores/hooks'
+import Button from '../Button'
+import { useRouter } from 'next/router'
 
 type Props = {
   menu: MenuAsideItem[]
@@ -22,9 +24,16 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
     isLogout: true,
   }
 
+  const router = useRouter()
+
   const handleAsideLgCloseClick = (e: React.MouseEvent) => {
     e.preventDefault()
     props.onAsideLgCloseClick()
+  }
+
+  const handleLogOut = () =>{
+    router.push('/login')
+
   }
 
   return (
@@ -37,11 +46,11 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
         <div
           className={`aside-brand flex flex-row h-14 items-center justify-between dark:bg-slate-900`}
         >
-          <div className="text-center flex-1 lg:text-left lg:pl-6 xl:text-center xl:pl-0">
+          <div className="flex-1 text-center lg:text-left lg:pl-6 xl:text-center xl:pl-0">
             <b className="font-black">One</b>
           </div>
           <button
-            className="hidden lg:inline-block xl:hidden p-3"
+            className="hidden p-3 lg:inline-block xl:hidden"
             onClick={handleAsideLgCloseClick}
           >
             <Icon path={mdiClose} />
@@ -55,7 +64,7 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
           <AsideMenuList menu={menu} />
         </div>
         <ul>
-          <AsideMenuItem item={logoutItem} />
+          <Button onClick={handleLogOut} className='w-full h-9' label='Log out'/>
         </ul>
       </div>
     </aside>

@@ -1,22 +1,26 @@
 import { mdiEye, mdiTrashCan } from '@mdi/js'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSampleClients } from '../../hooks/sampleData'
 import { Client } from '../../interfaces'
 import Button from '../Button'
 import Buttons from '../Buttons'
 import CardBoxModal from '../CardBox/Modal'
 import UserAvatar from '../UserAvatar'
+import useAxios from '../../hooks/useAxios'
+import Input from '../Input/Input'
 
-const TableSampleClients = () => {
-  const { clients } = useSampleClients()
-
-  const perPage = 5
+const TableSampleClients = ({ data:userData, setIsuserUpdate }: any) => {
+  const perPage = 8
 
   const [currentPage, setCurrentPage] = useState(0)
+  const [selectedItem, setSelectedItem] = useState(null)
+  const [SearchValue, setSearchValue] = useState('')
+  const [data, setData] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
 
-  const clientsPaginated = clients.slice(perPage * currentPage, perPage * (currentPage + 1))
+  const clientsPaginated = data?.slice(perPage * currentPage, perPage * (currentPage + 1))
 
-  const numPages = clients.length / perPage
+  const numPages = data?.length / perPage
 
   const pagesList = []
 
@@ -24,42 +28,107 @@ const TableSampleClients = () => {
     pagesList.push(i)
   }
 
+  const { data: statusData, error, loading, sendRequest } = useAxios()
+
+
   const [isModalInfoActive, setIsModalInfoActive] = useState(false)
   const [isModalTrashActive, setIsModalTrashActive] = useState(false)
 
+  useEffect(() => {
+    setIsuserUpdate(true)
+  }, [statusData])
+
   const handleModalAction = () => {
+    let method
+    sendRequest(
+      'user/status',
+      {
+        id: selectedItem?.id,
+        status: selectedItem?.status === 'ban' ? 'unban' : 'ban',
+      },
+      (method = 'PATCH')
+    )
     setIsModalInfoActive(false)
     setIsModalTrashActive(false)
   }
 
+  const handleCancelModalAction = () => {
+    setIsModalInfoActive(false)
+    setIsModalTrashActive(false)
+  }
+
+  const handleClick = (item) => {
+    setSelectedItem(item)
+  }
+
+  useEffect(() => {
+    if (SearchValue) {
+      const filteredData = originalData.filter((item) =>
+        item?.firstName?.toLowerCase().includes(SearchValue.toLowerCase())
+      );
+      setData(filteredData);
+    } else {
+      setData(originalData);
+    }
+  }, [SearchValue, originalData]);
+
+  useEffect(() => {
+    if(userData){
+     setData(userData)
+     setOriginalData(userData);
+    }
+   }, [userData])
+
+  console.log('Item', SearchValue)
+
   return (
     <>
+      <Input
+        icon={true}
+        value={SearchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
+        placeholder="Search Users"
+      />
+
       <CardBoxModal
-        title="Sample modal"
+        title="Health  Information"
         buttonColor="info"
         buttonLabel="Done"
         isActive={isModalInfoActive}
         onConfirm={handleModalAction}
-        onCancel={handleModalAction}
+        onCancel={handleCancelModalAction}
       >
-        <p>
-          Lorem ipsum dolor sit amet <b>adipiscing elit</b>
-        </p>
-        <p>This is sample modal</p>
+        <div className="flex justify-between">
+          <div>height</div>
+          <div>{selectedItem?.height}</div>
+        </div>
+        <div className="border"></div>
+        <div className="flex justify-between">
+          <div>weight</div>
+          <div>{selectedItem?.weight}</div>
+        </div>
+        <div className="border"></div>
+        <div className="flex justify-between">
+          <div>Age</div>
+          <div>{selectedItem?.age}</div>
+        </div>
+        <div className="border"></div>
+        <div className="flex justify-between">
+          <div>Gender</div>
+          <div>{selectedItem?.gender}</div>
+        </div>
+        <div className="border"></div>
       </CardBoxModal>
 
       <CardBoxModal
         title="Please confirm"
-        buttonColor="danger"
-        buttonLabel="Confirm"
+        buttonColor={selectedItem?.status === 'unban' ? 'danger' : 'success'}
+        buttonLabel={selectedItem?.status === 'unban' ? 'Ban' : 'Unban'}
         isActive={isModalTrashActive}
         onConfirm={handleModalAction}
         onCancel={handleModalAction}
       >
-        <p>
-          Lorem ipsum dolor sit amet <b>adipiscing elit</b>
-        </p>
-        <p>This is sample modal</p>
+        <p>Are you sure ?</p>
       </CardBoxModal>
 
       <table>
@@ -67,33 +136,33 @@ const TableSampleClients = () => {
           <tr>
             <th />
             <th>Name</th>
-            <th>Company</th>
-            <th>City</th>
+            <th>Email</th>
+            <th>Username</th>
             <th>Progress</th>
-            <th>Created</th>
             <th />
           </tr>
         </thead>
         <tbody>
-          {clientsPaginated.map((client: Client) => (
-            <tr key={client.id}>
+          {clientsPaginated?.map((item: any, index) => (
+            <tr
+              key={index}
+              onClick={() => {
+                handleClick(item)
+              }}
+            >
               <td className="border-b-0 lg:w-6 before:hidden">
-                <UserAvatar username={client.name} className="w-24 h-24 mx-auto lg:w-6 lg:h-6" />
+                {/* <UserAvatar username={client.name} className="w-24 h-24 mx-auto lg:w-6 lg:h-6" /> */}
               </td>
-              <td data-label="Name">{client.name}</td>
-              <td data-label="Company">{client.company}</td>
-              <td data-label="City">{client.city}</td>
+              <td data-label="Name">{item?.firstName + ' ' + item.lastName}</td>
+              <td data-label="Company">{item?.email}</td>
+              <td data-label="City">{item.username}</td>
               <td data-label="Progress" className="lg:w-32">
-                <progress
-                  className="flex w-2/5 self-center lg:w-full"
-                  max="100"
-                  value={client.progress}
-                >
-                  {client.progress}
+                <progress className="flex self-center w-2/5 lg:w-full" max="100" value={80}>
+                  {90}
                 </progress>
               </td>
               <td data-label="Created" className="lg:w-1 whitespace-nowrap">
-                <small className="text-gray-500 dark:text-slate-400">{client.created}</small>
+                <small className="text-gray-500 dark:text-slate-400">{item?.created}</small>
               </td>
               <td className="before:hidden lg:w-1 whitespace-nowrap">
                 <Buttons type="justify-start lg:justify-end" noWrap>
@@ -104,8 +173,9 @@ const TableSampleClients = () => {
                     small
                   />
                   <Button
-                    color="danger"
-                    icon={mdiTrashCan}
+                    color={item?.status === 'ban' ? 'danger' : 'success'}
+                    // icon={mdiTrashCan}
+                    label="Ban"
                     onClick={() => setIsModalTrashActive(true)}
                     small
                   />
@@ -115,8 +185,8 @@ const TableSampleClients = () => {
           ))}
         </tbody>
       </table>
-      <div className="p-3 lg:px-6 border-t border-gray-100 dark:border-slate-800">
-        <div className="flex flex-col md:flex-row items-center justify-between py-3 md:py-0">
+      <div className="p-3 border-t border-gray-100 lg:px-6 dark:border-slate-800">
+        <div className="flex flex-col items-center justify-between py-3 md:flex-row md:py-0">
           <Buttons>
             {pagesList.map((page) => (
               <Button
