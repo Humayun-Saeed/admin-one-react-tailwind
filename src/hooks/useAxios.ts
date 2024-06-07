@@ -6,32 +6,35 @@ const useAxios = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-//   const {state} = useAppContext()
+//   const { state } = useAppContext();
 
-  const sendRequest = async (endPoint?:string, body=null, method?:string, headers = null) => {
-    let baseURL = "http://172.19.0.1:4000/";
-    let url;
-
-    if (endPoint) {
-      url = baseURL + endPoint;
+  // Safe localStorage access
+  const getToken = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("Token");
     }
+    return null;
+  };
 
-    console.log("body",body);
+  let token = getToken();
+  console.log("token", token);
+
+  const sendRequest = async (endPoint, body = null, method = "GET", headers = null) => {
+    let baseURL = "http://172.19.0.1:4000/";
+    let url = endPoint ? baseURL + endPoint : baseURL;
+
+    console.log("body", body);
     setLoading(true);
     try {
       let axiosConfig = {
-        method: method ? method : body ? "POST" : "GET",
+        method: method || (body ? "POST" : "GET"),
         url,
-        // headers: { Authorization: `Bearer ${state?.token?.token}` },
+        headers: {
+          // Authorization: token ? `Bearer ${token}` : undefined,
+          ...headers,
+        },
+        data: body,
       };
-      if (body) {
-        axiosConfig = {
-          ...axiosConfig,
-          data: body,
-        };
-      }
-
-      // console.log("body",axiosConfig);
 
       const response = await axios(axiosConfig);
       setData(response.data);

@@ -33,10 +33,15 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (data?.token) {
-      setToken(data?.token)
-      router.push('/dashboard')
+      // setToken(data?.token)
+     handleNavigate()
     }
   }, [data])
+
+  const handleNavigate = () =>{
+    localStorage.setItem('Token',data?.token)
+    router.push('/dashboard')
+  }
 
   const initialValues: LoginForm = {
     login: '',
@@ -69,7 +74,6 @@ const LoginPage = () => {
 
               <Buttons>
                 <Button type="submit" label="Login" color="info" />
-                <Button href="/dashboard" label="Home" color="info" outline />
               </Buttons>
             </Form>
           </Formik>

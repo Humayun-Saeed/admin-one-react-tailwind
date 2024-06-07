@@ -31,9 +31,9 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
     props.onAsideLgCloseClick()
   }
 
-  const handleLogOut = () =>{
+  const handleLogOut = () => {
     router.push('/login')
-
+    localStorage.removeItem('Token')
   }
 
   return (
@@ -64,7 +64,7 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
           <AsideMenuList menu={menu} />
         </div>
         <ul>
-          <Button onClick={handleLogOut} className='w-full h-9' label='Log out'/>
+          <Button onClick={handleLogOut} className="w-full h-9" label="Log out" />
         </ul>
       </div>
     </aside>
